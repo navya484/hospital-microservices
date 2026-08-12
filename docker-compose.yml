@@ -60,6 +60,18 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  analytics-service:
+    build:
+      context: ./analytics-service
+    container_name: analytics-service
+    ports:
+      - "4002:4002"
+    environment:
+      SERVER_PORT: 4002
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_started
     
 
 volumes:
