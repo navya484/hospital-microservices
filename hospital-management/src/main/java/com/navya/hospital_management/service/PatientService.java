@@ -13,16 +13,19 @@ import java.time.LocalDate;
 import java.util.List;
 import billing.BillingResponse;
 import com.navya.hospital_management.grpc.BillingServiceGrpcClient;
+import com.navya.hospital_management.kafka.KafkaProducer;
 
 @Service
 public class PatientService {
 
     private final PatientRepository patientRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
+    private final KafkaProducer kafkaProducer;
 
-    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer) {
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public List<PatientResponseDTO> getPatients() {
@@ -47,6 +50,7 @@ public class PatientService {
                         newPatient.getName(),
                         newPatient.getEmail()
                 );
+        kafkaProducer.sendEvent(newPatient);
 
         return PatientMapper.toPatientResponseDTO(newPatient);
     } 
