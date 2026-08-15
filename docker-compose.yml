@@ -83,7 +83,45 @@ services:
     depends_on:
       hospital-management:
         condition: service_started
+
+  auth-service-db:
+    image: postgres:16
+    container_name: auth-service-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5001:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    ports:
+      - "4005:4005"
+    environment:
+      SERVER_PORT: 4005
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-service-db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: admin_user
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      auth-service-db:
+        condition: service_started
+    networks:
+      - default
+      - internal
     
 
 volumes:
   postgres_data:
+  auth_db_data:
+
+networks:
+  internal:
+    driver: bridge
