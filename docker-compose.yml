@@ -83,6 +83,8 @@ services:
     depends_on:
       hospital-management:
         condition: service_started
+      auth-service:
+        condition: service_started
 
   auth-service-db:
     image: postgres:16
