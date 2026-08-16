@@ -4,17 +4,30 @@ server:
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
       server:
         webflux:
           routes:
+            - id: auth-service-route
+              uri: http://auth-service:4005
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
+
             - id: patient-service-route
               uri: http://hospital-management:4000
               predicates:
                 - Path=/api/patients/**
               filters:
                 - StripPrefix=1
+                - JwtValidation
+
+auth:
+  service:
+    url: http://auth-service:4005
 
 logging:
   level:
