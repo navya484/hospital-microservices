@@ -12,6 +12,12 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
     private static final org.slf4j.Logger log =
             org.slf4j.LoggerFactory.getLogger(BillingGrpcService.class);
 
+    private final com.navya.billing_service.repository.BillingRepository billingRepository;
+
+    public BillingGrpcService(com.navya.billing_service.repository.BillingRepository billingRepository) {
+        this.billingRepository = billingRepository;
+    }
+
     @Override
     public void createBillingAccount(
             BillingRequest request,
@@ -19,11 +25,14 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
 
         log.info("CreateBillingAccount request received: {}", request);
 
-        // Business logic
-        // e.g. save billing account to database, perform calculations, etc.
+        String accountId = "ACC-" + request.getPatientId();
+        
+        com.navya.billing_service.model.BillingAccount account = new com.navya.billing_service.model.BillingAccount(
+                accountId, request.getPatientId(), "ACTIVE", 0.0);
+        billingRepository.save(account);
 
         BillingResponse response = BillingResponse.newBuilder()
-                .setAccountId("ACC-" + request.getPatientId())
+                .setAccountId(accountId)
                 .setStatus("ACTIVE")
                 .build();
 
