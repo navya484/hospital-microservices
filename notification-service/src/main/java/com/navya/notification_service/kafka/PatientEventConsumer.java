@@ -1,5 +1,7 @@
 package com.navya.notification_service.kafka;
 
+import com.navya.notification_service.model.NotificationRecord;
+import com.navya.notification_service.repository.NotificationRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -7,6 +9,12 @@ import patient.events.PatientEvent;
 
 @Service
 public class PatientEventConsumer {
+
+    private final NotificationRepository notificationRepository;
+
+    public PatientEventConsumer(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     @KafkaListener(
             topics = "patient",
@@ -26,6 +34,15 @@ public class PatientEventConsumer {
             System.out.println("[NOTIFICATION] Would send email to " + event.getEmail()
                     + " regarding event: " + event.getEventType());
             System.out.println("--------------------------------------------------");
+
+            // Save the notification record so the REST API can serve it
+            NotificationRecord record = new NotificationRecord(
+                    event.getPatientId(),
+                    event.getName(),
+                    event.getEmail(),
+                    event.getEventType()
+            );
+            notificationRepository.save(record);
 
         } catch (Exception e) {
             System.err.println("Error processing patient event for notification: " + e.getMessage());
