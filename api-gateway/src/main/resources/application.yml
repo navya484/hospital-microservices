@@ -25,6 +25,30 @@ spring:
                 - StripPrefix=1
                 - JwtValidation
 
+            - id: billing-service-route
+              uri: http://billing-service:4001
+              predicates:
+                - Path=/api/billing/**
+              filters:
+                - StripPrefix=1
+                - JwtValidation
+
+            - id: analytics-service-route
+              uri: http://analytics-service:4002
+              predicates:
+                - Path=/api/analytics/**
+              filters:
+                - StripPrefix=1
+                - JwtValidation
+
+            - id: notification-service-route
+              uri: http://notification-service:4003
+              predicates:
+                - Path=/api/notifications/**
+              filters:
+                - StripPrefix=1
+                - JwtValidation
+
 auth:
   service:
     url: http://auth-service:4005
