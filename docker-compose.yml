@@ -17,29 +17,6 @@ services:
       timeout: 5s
       retries: 5
 
-  billing-service:
-    build:
-      context: ./billing-service
-    container_name: billing-service
-    environment:
-      SERVER_PORT: 4001
-      GRPC_SERVER_PORT: 9001
-
-  hospital-management:
-    build:
-      context: ./hospital-management
-    container_name: hospital-management
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hospital_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      DB_PASSWORD: ${DB_PASSWORD}
-      BILLING_SERVICE_ADDRESS: billing-service
-      BILLING_SERVICE_GRPC_PORT: 9001
-    depends_on:
-      postgres:
-        condition: service_healthy
-      billing-service:
-        condition: service_started
   kafka:
     image: apache/kafka:3.8.0
     container_name: kafka
@@ -55,42 +32,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-  analytics-service:
-    build:
-      context: ./analytics-service
-    container_name: analytics-service
-    environment:
-      SERVER_PORT: 4002
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    depends_on:
-      kafka:
-        condition: service_started
-
-  notification-service:
-    build:
-      context: ./notification-service
-    container_name: notification-service
-    environment:
-      SERVER_PORT: 4003
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    depends_on:
-      kafka:
-        condition: service_started
-
-  api-gateway:
-    build:
-      context: ./api-gateway
-    container_name: api-gateway
-    ports:
-      - "4004:4004"
-    environment:
-      SERVER_PORT: 4004
-    depends_on:
-      hospital-management:
-        condition: service_started
-      auth-service:
-        condition: service_started
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   auth-service-db:
     image: postgres:16
@@ -105,6 +51,11 @@ services:
       - auth_db_data:/var/lib/postgresql/data
     networks:
       - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   auth-service:
     build:
@@ -118,11 +69,102 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
       auth-service-db:
-        condition: service_started
+        condition: service_healthy
     networks:
       - default
       - internal
-    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4005/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  billing-service:
+    build:
+      context: ./billing-service
+    container_name: billing-service
+    environment:
+      SERVER_PORT: 4001
+      GRPC_SERVER_PORT: 9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hospital-management:
+    build:
+      context: ./hospital-management
+    container_name: hospital-management
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hospital_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      BILLING_SERVICE_ADDRESS: billing-service
+      BILLING_SERVICE_GRPC_PORT: 9001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      billing-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analytics-service:
+    build:
+      context: ./analytics-service
+    container_name: analytics-service
+    environment:
+      SERVER_PORT: 4002
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: notification-service
+    environment:
+      SERVER_PORT: 4003
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "4004:4004"
+    environment:
+      SERVER_PORT: 4004
+    depends_on:
+      hospital-management:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4004/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
