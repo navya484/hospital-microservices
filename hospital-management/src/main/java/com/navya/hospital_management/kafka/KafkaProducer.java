@@ -26,9 +26,16 @@ public class KafkaProducer {
                 .build();
 
         try {
-            kafkaTemplate.send("patient", event.toByteArray());
+            kafkaTemplate.send("patient", event.toByteArray())
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Failed to send PatientCreated event to Kafka for patient {}: {}", patient.getId(), ex.getMessage());
+                        } else {
+                            log.debug("Successfully sent PatientCreated event for patient {}", patient.getId());
+                        }
+                    });
         } catch (Exception e) {
-            log.error("Error sending PatientCreated event: {}", event);
+            log.error("Synchronous error before sending PatientCreated event: {}", e.getMessage());
         }
     }
 }
