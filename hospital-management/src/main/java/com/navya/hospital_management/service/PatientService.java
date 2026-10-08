@@ -15,7 +15,10 @@ import billing.BillingResponse;
 import com.navya.hospital_management.grpc.BillingServiceGrpcClient;
 import com.navya.hospital_management.kafka.KafkaProducer;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
+@Transactional
 public class PatientService {
 
     private final PatientRepository patientRepository;
