@@ -8,13 +8,31 @@ import AnalyticsPage from './pages/Analytics/AnalyticsPage'
 import NotificationsPage from './pages/Notifications/NotificationsPage'
 import SettingsPage from './pages/Settings/SettingsPage'
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    return <Navigate to="/login" replace />
+  }
+
+  return children
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/* Login */}
         <Route path="/login" element={<LoginPage />} />
-        <Route element={<DashboardLayout />}>
+
+        {/* Protected application */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/patients" element={<PatientsPage />} />
           <Route path="/billing" element={<BillingPage />} />
@@ -22,6 +40,12 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
+
+        {/* Default */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Unknown routes */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   )

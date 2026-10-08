@@ -11,7 +11,8 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import Input from '../../components/ui/Input'
 import { useToast } from '../../context/ToastContext'
-import { patientService, Patient, PatientRequest } from '../../services/patientService'
+import { patientService } from '../../services/patientService'
+import type { Patient, PatientRequest } from '../../services/patientService'
 
 export default function PatientsPage() {
   const { showToast } = useToast()
@@ -120,7 +121,8 @@ export default function PatientsPage() {
         title="Patients" 
         description="Manage hospital patients and their records."
         actions={
-          <Button onClick={() => handleOpenForm()} icon={Plus}>
+          <Button onClick={() => handleOpenForm()}>
+            <Plus/>
             Add Patient
           </Button>
         }
