@@ -55,9 +55,15 @@ public class AuthController {
                     .build();
         }
 
-        return authService.validateToken(authHeader.substring(7))
-                ? ResponseEntity.ok().build()
-                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Optional<String> roleOptional = authService.validateAndExtractRole(authHeader.substring(7));
+        
+        if (roleOptional.isPresent()) {
+            return ResponseEntity.ok()
+                    .header("X-User-Role", roleOptional.get())
+                    .build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
     
 }

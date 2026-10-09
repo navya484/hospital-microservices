@@ -57,4 +57,11 @@ public class AuthService {
             return false;
         }
     }
+
+    public Optional<String> validateAndExtractRole(String token) {
+        if (validateToken(token)) {
+            return Optional.ofNullable(jwtUtil.extractRole(token));
+        }
+        return Optional.empty();
+    }
 }

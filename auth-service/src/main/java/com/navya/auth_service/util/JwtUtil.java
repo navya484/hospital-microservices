@@ -61,5 +61,16 @@ public class JwtUtil {
 
             throw new JwtException("Invalid JWT");
         }
+    public String extractRole(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith((SecretKey) secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get("role", String.class);
+        } catch (JwtException e) {
+            return null;
+        }
     }
 }
