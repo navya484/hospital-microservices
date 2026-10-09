@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @RestController
 @RequestMapping("/patients")
@@ -55,7 +55,14 @@ public class PatientController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a patient")
-    public ResponseEntity<Void> deletePatient(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletePatient(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+
         patientService.deletePatient(id);
         return ResponseEntity.noContent().build();
     }
