@@ -19,8 +19,29 @@ public class NotificationController {
         this.notificationRepository = notificationRepository;
     }
 
+    private final java.util.concurrent.CopyOnWriteArrayList<org.springframework.web.servlet.mvc.method.annotation.SseEmitter> emitters = new java.util.concurrent.CopyOnWriteArrayList<>();
+
     @GetMapping
     public ResponseEntity<List<NotificationRecord>> getNotifications() {
         return ResponseEntity.ok(notificationRepository.findAll());
+    }
+
+    @GetMapping("/stream")
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter stream() {
+        org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter = new org.springframework.web.servlet.mvc.method.annotation.SseEmitter(Long.MAX_VALUE);
+        emitters.add(emitter);
+        emitter.onCompletion(() -> emitters.remove(emitter));
+        emitter.onTimeout(() -> emitters.remove(emitter));
+        return emitter;
+    }
+
+    public void dispatch(NotificationRecord record) {
+        for (org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter : emitters) {
+            try {
+                emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("notification").data(record));
+            } catch (Exception e) {
+                emitters.remove(emitter);
+            }
+        }
     }
 }

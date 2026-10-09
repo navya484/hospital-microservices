@@ -11,9 +11,12 @@ import patient.events.PatientEvent;
 public class PatientEventConsumer {
 
     private final NotificationRepository notificationRepository;
+    private final com.navya.notification_service.controller.NotificationController notificationController;
 
-    public PatientEventConsumer(NotificationRepository notificationRepository) {
+    public PatientEventConsumer(NotificationRepository notificationRepository, 
+                                com.navya.notification_service.controller.NotificationController notificationController) {
         this.notificationRepository = notificationRepository;
+        this.notificationController = notificationController;
     }
 
     @KafkaListener(
@@ -43,6 +46,9 @@ public class PatientEventConsumer {
                     event.getEventType()
             );
             notificationRepository.save(record);
+            
+            // Dispatch to connected SSE clients
+            notificationController.dispatch(record);
 
         } catch (Exception e) {
             System.err.println("Error processing patient event for notification: " + e.getMessage());
