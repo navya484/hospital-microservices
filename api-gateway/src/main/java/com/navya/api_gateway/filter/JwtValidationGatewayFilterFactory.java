@@ -38,7 +38,10 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                     .header(HttpHeaders.AUTHORIZATION, token)
                     .exchangeToMono(response -> {
                         if (response.statusCode().is2xxSuccessful()) {
-                            return chain.filter(exchange);
+                            String role = response.headers().header("X-User-Role").stream().findFirst().orElse("");
+                            var mutatedRequest = exchange.getRequest().mutate().header("X-User-Role", role).build();
+                            var mutatedExchange = exchange.mutate().request(mutatedRequest).build();
+                            return chain.filter(mutatedExchange);
                         }
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
