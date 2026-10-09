@@ -28,6 +28,13 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                     .getHeaders()
                     .getFirst(HttpHeaders.AUTHORIZATION);
 
+            if (token == null) {
+                String queryToken = exchange.getRequest().getQueryParams().getFirst("token");
+                if (queryToken != null) {
+                    token = "Bearer " + queryToken;
+                }
+            }
+
             if (token == null || !token.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
