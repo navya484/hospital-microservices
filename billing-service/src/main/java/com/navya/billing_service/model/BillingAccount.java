@@ -1,6 +1,14 @@
 package com.navya.billing_service.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "billing_accounts")
 public class BillingAccount {
+
+    @Id
     private String accountId;
     private String patientId;
     private String status;

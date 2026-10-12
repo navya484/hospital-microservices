@@ -83,6 +83,13 @@ services:
     environment:
       SERVER_PORT: 4001
       GRPC_SERVER_PORT: 9001
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hospital_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "bash", "-c", "</dev/tcp/localhost/4001"]
       interval: 10s
