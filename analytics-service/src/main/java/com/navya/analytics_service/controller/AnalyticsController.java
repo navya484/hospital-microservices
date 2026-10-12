@@ -21,20 +21,20 @@ public class AnalyticsController {
         this.analyticsRepository = analyticsRepository;
     }
 
-    // Returns all raw patient events
+    // Returns all raw patient events ordered chronologically
     @GetMapping("/events")
     public ResponseEntity<List<PatientEventRecord>> getEvents() {
-        return ResponseEntity.ok(analyticsRepository.findAll());
+        return ResponseEntity.ok(analyticsRepository.findAllByOrderByReceivedAtAsc());
     }
 
-    // Returns summary stats like total patients registered, updated, deleted
+    // Returns summary stats like total patients registered, updated, deleted from PostgreSQL
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Long>> getSummary() {
         Map<String, Long> summary = new HashMap<>();
-        summary.put("totalEvents", analyticsRepository.getTotalEvents());
-        summary.put("registered", analyticsRepository.countByEventType("REGISTERED"));
-        summary.put("updated", analyticsRepository.countByEventType("UPDATED"));
-        summary.put("deleted", analyticsRepository.countByEventType("DELETED"));
+        summary.put("totalEvents", analyticsRepository.count());
+        summary.put("registered", analyticsRepository.countRegistered());
+        summary.put("updated", analyticsRepository.countUpdated());
+        summary.put("deleted", analyticsRepository.countDeleted());
         return ResponseEntity.ok(summary);
     }
 }

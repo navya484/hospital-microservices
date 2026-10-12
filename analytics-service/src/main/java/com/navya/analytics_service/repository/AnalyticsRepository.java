@@ -1,46 +1,23 @@
 package com.navya.analytics_service.repository;
 
 import com.navya.analytics_service.model.PatientEventRecord;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
 
 @Repository
-public class AnalyticsRepository {
+public interface AnalyticsRepository extends JpaRepository<PatientEventRecord, Long> {
 
-    // A synchronized list so that multiple Kafka threads can safely add records
-    private final List<PatientEventRecord> events = Collections.synchronizedList(new ArrayList<>());
+    @Query("SELECT COUNT(e) FROM PatientEventRecord e WHERE UPPER(e.eventType) = 'REGISTERED' OR UPPER(e.eventType) = 'PATIENT_CREATED'")
+    long countRegistered();
 
-    public void save(PatientEventRecord record) {
-        events.add(record);
-    }
+    @Query("SELECT COUNT(e) FROM PatientEventRecord e WHERE UPPER(e.eventType) = 'UPDATED' OR UPPER(e.eventType) = 'PATIENT_UPDATED'")
+    long countUpdated();
 
-    public List<PatientEventRecord> findAll() {
-        return new ArrayList<>(events);
-    }
+    @Query("SELECT COUNT(e) FROM PatientEventRecord e WHERE UPPER(e.eventType) = 'DELETED' OR UPPER(e.eventType) = 'PATIENT_DELETED'")
+    long countDeleted();
 
-    public long getTotalEvents() {
-        return events.size();
-    }
-
-    public long countByEventType(String eventType) {
-        return events.stream()
-                .filter(e -> {
-                    if (e.getEventType() == null) return false;
-                    String type = e.getEventType().toUpperCase();
-                    if ("REGISTERED".equalsIgnoreCase(eventType)) {
-                        return type.equals("REGISTERED") || type.equals("PATIENT_CREATED");
-                    }
-                    if ("UPDATED".equalsIgnoreCase(eventType)) {
-                        return type.equals("UPDATED") || type.equals("PATIENT_UPDATED");
-                    }
-                    if ("DELETED".equalsIgnoreCase(eventType)) {
-                        return type.equals("DELETED") || type.equals("PATIENT_DELETED");
-                    }
-                    return type.equalsIgnoreCase(eventType);
-                })
-                .count();
-    }
+    List<PatientEventRecord> findAllByOrderByReceivedAtAsc();
 }
