@@ -163,6 +163,16 @@ services:
       timeout: 5s
       retries: 5
 
+  hospital-frontend:
+    build:
+      context: ./hospital-frontend
+    container_name: hospital-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   auth_db_data:
