@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", "Patient not found");
 
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND).body(errors);
     }
     
 }
