@@ -23,7 +23,7 @@ public class NotificationController {
 
     @GetMapping
     public ResponseEntity<List<NotificationRecord>> getNotifications() {
-        return ResponseEntity.ok(notificationRepository.findAll());
+        return ResponseEntity.ok(notificationRepository.findAllByOrderBySentAtAsc());
     }
 
     @GetMapping("/stream")

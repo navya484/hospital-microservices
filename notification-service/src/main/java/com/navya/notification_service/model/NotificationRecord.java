@@ -1,6 +1,19 @@
 package com.navya.notification_service.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "notifications")
 public class NotificationRecord {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String patientId;
     private String name;
     private String email;
@@ -18,6 +31,18 @@ public class NotificationRecord {
         this.message = "Notification sent to " + email + " regarding event: " + eventType;
         this.sentAt = System.currentTimeMillis();
     }
+
+    public NotificationRecord(String patientId, String name, String email, String eventType, long sentAt) {
+        this.patientId = patientId;
+        this.name = name;
+        this.email = email;
+        this.eventType = eventType;
+        this.message = "Notification sent to " + email + " regarding event: " + eventType;
+        this.sentAt = sentAt;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
