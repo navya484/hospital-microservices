@@ -27,7 +27,20 @@ public class AnalyticsRepository {
 
     public long countByEventType(String eventType) {
         return events.stream()
-                .filter(e -> eventType.equalsIgnoreCase(e.getEventType()))
+                .filter(e -> {
+                    if (e.getEventType() == null) return false;
+                    String type = e.getEventType().toUpperCase();
+                    if ("REGISTERED".equalsIgnoreCase(eventType)) {
+                        return type.equals("REGISTERED") || type.equals("PATIENT_CREATED");
+                    }
+                    if ("UPDATED".equalsIgnoreCase(eventType)) {
+                        return type.equals("UPDATED") || type.equals("PATIENT_UPDATED");
+                    }
+                    if ("DELETED".equalsIgnoreCase(eventType)) {
+                        return type.equals("DELETED") || type.equals("PATIENT_DELETED");
+                    }
+                    return type.equalsIgnoreCase(eventType);
+                })
                 .count();
     }
 }

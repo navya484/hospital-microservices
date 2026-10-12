@@ -21,13 +21,13 @@ export default function DashboardLayout() {
         let title = 'New Event'
         let variant: 'success' | 'warning' | 'error' = 'info' as any
         
-        if (data.eventType === 'REGISTERED') {
+        if (data.eventType === 'REGISTERED' || data.eventType === 'PATIENT_CREATED') {
           title = 'New Patient Admitted'
           variant = 'success'
-        } else if (data.eventType === 'UPDATED') {
+        } else if (data.eventType === 'UPDATED' || data.eventType === 'PATIENT_UPDATED') {
           title = 'Patient Record Updated'
           variant = 'warning'
-        } else if (data.eventType === 'DELETED') {
+        } else if (data.eventType === 'DELETED' || data.eventType === 'PATIENT_DELETED') {
           title = 'Patient Discharged'
           variant = 'error'
         }

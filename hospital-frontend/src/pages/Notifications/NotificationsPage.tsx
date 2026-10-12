@@ -26,13 +26,31 @@ const eventTypeStyles: Record<
     text: 'text-success-700',
     dot: 'bg-success-500',
   },
+  PATIENT_CREATED: {
+    label: 'Registered',
+    bg: 'bg-success-50',
+    text: 'text-success-700',
+    dot: 'bg-success-500',
+  },
   UPDATED: {
     label: 'Updated',
     bg: 'bg-warning-50',
     text: 'text-warning-700',
     dot: 'bg-warning-500',
   },
+  PATIENT_UPDATED: {
+    label: 'Updated',
+    bg: 'bg-warning-50',
+    text: 'text-warning-700',
+    dot: 'bg-warning-500',
+  },
   DELETED: {
+    label: 'Discharged / Deleted',
+    bg: 'bg-error-50',
+    text: 'text-error-700',
+    dot: 'bg-error-500',
+  },
+  PATIENT_DELETED: {
     label: 'Discharged / Deleted',
     bg: 'bg-error-50',
     text: 'text-error-700',
@@ -60,9 +78,9 @@ export default function NotificationsPage() {
   const metrics = useMemo(() => {
     if (!notifications) return { total: 0, registered: 0, updated: 0, deleted: 0 }
     const total = notifications.length
-    const registered = notifications.filter((n) => n.eventType === 'REGISTERED').length
-    const updated = notifications.filter((n) => n.eventType === 'UPDATED').length
-    const deleted = notifications.filter((n) => n.eventType === 'DELETED').length
+    const registered = notifications.filter((n) => n.eventType === 'REGISTERED' || n.eventType === 'PATIENT_CREATED').length
+    const updated = notifications.filter((n) => n.eventType === 'UPDATED' || n.eventType === 'PATIENT_UPDATED').length
+    const deleted = notifications.filter((n) => n.eventType === 'DELETED' || n.eventType === 'PATIENT_DELETED').length
     return { total, registered, updated, deleted }
   }, [notifications])
 
@@ -74,7 +92,12 @@ export default function NotificationsPage() {
         n.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         n.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (n.message && n.message.toLowerCase().includes(searchTerm.toLowerCase()))
-      const matchesTab = activeTab === 'ALL' || n.eventType === activeTab
+      const matchesTab =
+        activeTab === 'ALL' ||
+        n.eventType === activeTab ||
+        (activeTab === 'REGISTERED' && n.eventType === 'PATIENT_CREATED') ||
+        (activeTab === 'UPDATED' && n.eventType === 'PATIENT_UPDATED') ||
+        (activeTab === 'DELETED' && n.eventType === 'PATIENT_DELETED')
       return matchesSearch && matchesTab
     })
   }, [notifications, searchTerm, activeTab])

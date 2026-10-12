@@ -305,9 +305,9 @@ export default function AnalyticsPage() {
                     <td className="px-5 py-3">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          event.eventType === 'REGISTERED'
+                          event.eventType === 'REGISTERED' || event.eventType === 'PATIENT_CREATED'
                             ? 'bg-success-100 text-success-800'
-                            : event.eventType === 'UPDATED'
+                            : event.eventType === 'UPDATED' || event.eventType === 'PATIENT_UPDATED'
                             ? 'bg-warning-100 text-warning-800'
                             : 'bg-error-100 text-error-800'
                         }`}
